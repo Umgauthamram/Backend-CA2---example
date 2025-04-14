@@ -1,15 +1,11 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const connectDB = require("./config/db");
 const User = require("./model/schema");
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-
-
-connectDB();
 
 
 app.post("/post", async (req, res) => {
