@@ -7,6 +7,9 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+app.get("/", (req,res)=>{
+    res.send("<h1>Hello, server is running.</h1>")
+})
 
 app.post("/post", async (req, res) => {
   try {
