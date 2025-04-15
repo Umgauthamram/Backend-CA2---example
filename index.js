@@ -1,51 +1,49 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const User = require("./model/schema");
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
+let users = [];
+let currentId = 1;
 
-app.get("/", (req,res)=>{
-  res.send("<h1>Hello, server is running.</h1>")
-})
+app.get("/", (req, res) => {
+  res.send("<h1>Hello, server is running.</h1>");
+});
 
-app.post("/post", async (req, res) => {
-  try {
-    const user = await User.create(req.body);
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+app.post("/post", (req, res) => {
+  const newUser = { id: currentId++, ...req.body };
+  users.push(newUser);
+  res.status(201).json(newUser);
+});
+
+app.get("/get", (req, res) => {
+  res.json(users);
+});
+
+app.put("/put/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = users.findIndex(user => user.id === id);
+
+  if (index !== -1) {
+    users[index] = { ...users[index], ...req.body };
+    res.json(users[index]);
+  } else {
+    res.status(404).json({ error: "User not found" });
   }
 });
 
+app.delete("/delete/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = users.findIndex(user => user.id === id);
 
-app.get("/get", async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-app.put("/put/:id", async (req, res) => {
-  try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: "Update failed" });
-  }
-});
-
-app.delete("/delete/:id", async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.params.id);
+  if (index !== -1) {
+    users.splice(index, 1);
     res.json({ message: "User deleted" });
-  } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
+  } else {
+    res.status(404).json({ error: "User not found" });
   }
 });
 
